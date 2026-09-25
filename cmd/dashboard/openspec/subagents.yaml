@@ -1,0 +1,22 @@
+```
+# Configuración de Subagentes Acorazados Gentle Shell v3.7.0
+version: "3.7.0"
+orchestrator: "Gentle Shell / Gentle Pi"
+
+subagents:
+  - id: "subagent-edge-pixel"
+    role: "UI/Voice &amp; Edge Runtime Engineer"
+    repository_root: "apps/pixel-edge-app"
+    scope: "Capacidades de voz manos libres y sanitización local Gentle Engram PHI/PII"
+
+  - id: "subagent-iot-firmware"
+    role: "IoT &amp; Cold Chain Firmware Engineer"
+    repository_root: "firmware/iot-coldchain"
+    scope: "Sensores térmicos (+2°C a +8°C) y escáner GS1 GTIN-13 DataMatrix"
+
+  - id: "subagent-cloud-fhir"
+    role: "Google Cloud &amp; FHIR R4 Architect"
+    repository_root: "backend/cloud-healthcare"
+    scope: "Google Cloud Healthcare API, Vertex AI (MedGemma) e integración de interoperabilidad"
+
+```F
