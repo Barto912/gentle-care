@@ -1,0 +1,22 @@
+```
+# Gentle Care - OpenSpec &amp; RDD Budget Configuration
+review:
+  thresholds:
+    max_change_lines: 400
+    max_fix_lines: 120
+    max_fix_budget_cap: 200
+
+  rounds:
+    rdd_max_rounds: 1
+    judgment_day_max_rounds: 2
+
+  escalation:
+    on_budget_exceeded: escalate
+    on_validator_failure: escalate
+    fail_close: true
+    filter_preexisting: true
+
+  scope_reduction:
+    inspect_modified_only: true
+
+```
