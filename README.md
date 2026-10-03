@@ -1,3 +1,5 @@
+[![CI](https://github.com/Barto912/gentle-care/actions/workflows/main.yml/badge.svg)](https://github.com/Barto912/gentle-care/actions/workflows/main.yml)
+
 ## 🚧 Estado del Proyecto: INVESTIGACIÓN
 
 Este proyecto se encuentra en fase de **investigación y desarrollo (I+D)**. 
