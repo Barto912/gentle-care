@@ -1,0 +1,40 @@
+name: Gentle Care - RDD Continuous Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    name: Run Go Tests & RDD Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+
+      - name: Verify Module Layout
+        run: |
+          test -f go.mod || { echo "::error::go.mod no encontrado en la raíz"; exit 1; }
+          go version
+
+      - name: Run Unit Tests
+        run: go test -v ./...
+
+      - name: Static Analysis (vet)
+        run: go vet ./...
+
+      - name: Build Core Engine
+        run: go build ./...
