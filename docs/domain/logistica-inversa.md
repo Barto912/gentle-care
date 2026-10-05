@@ -37,10 +37,10 @@ Alianza Clínica Canning Health × socio tecnológico (Nurse Canning 24): retiro
 |---|---|---|
 | `MedicationIdentity` | Identidad normativa de la unidad: **GTIN + serie + lote + vencimiento** (Disp. ANMAT 3683/2011). Value object. | "GTIN-13", "el código": el GTIN es un componente, no la identidad |
 | `MecanismoDeLectura` | Infraestructura física que captura la MedicationIdentity: barcode 1D, DataMatrix, RFID. **Infraestructura, no dominio.** | "Scanner" como concepto de dominio |
-| `EventoDeRetiro` | Aggregate root: instancia de retiro de una o más unidades desde un domicilio, desde la detección hasta la disposición final certificada. | "Ticket", "caso", "retiro" (ambiguo) |
+| `RetiroFarmaceutico` | Aggregate root: instancia de retiro de una o más unidades desde un domicilio, desde la detección hasta la disposición final certificada. | "Ticket", "caso", "retiro" (ambiguo) |
 | `CadenaDeCustodia` | Secuencia de `NodoDeTransferencia` que documenta cada cambio de posesión física. | "Trazabilidad": la trazabilidad es la propiedad; la cadena es la estructura |
 | `NodoDeTransferencia` | Entity: cambio de posesión entre dos actores, con lugar, tiempo y firma dual. | "Entrega", "handover" |
-| `Manifiesto` | Documento regulatorio de transporte (triplicado) que vincula el EventoDeRetiro con un transportista habilitado. | "Remito", "guía" |
+| `Manifiesto` | Documento regulatorio de transporte (triplicado) que vincula el RetiroFarmaceutico con un transportista habilitado. | "Remito", "guía" |
 | `OperadorHabilitado` | Aggregate de datos maestros: transportista o planta con habilitación OPDS/autoridad **vigente**. | "Vendor", "proveedor" |
 | `ReceiptOperacional` | Evidencia firmada de un **hecho del dominio clínico-operativo** (consentimiento, transferencia, disposición). Ver §10. | RDD / DevelopmentReceipt |
 | `DevelopmentReceipt` (RDD) | Evidencia del **proceso de desarrollo** de Gentle-AI (builds, gates, evaluaciones). Otro contexto, otro lifecycle. | ReceiptOperacional |
@@ -66,7 +66,7 @@ Alianza Clínica Canning Health × socio tecnológico (Nurse Canning 24): retiro
 
 ---
 
-## 4. Ciclo de vida de `EventoDeRetiro` (máquina de estados)
+## 4. Ciclo de vida de `RetiroFarmaceutico` (máquina de estados)
 
 ```
 Detectado
@@ -173,7 +173,7 @@ Detectado
 | Notificación a MédicoTratante | Nurse Canning 24 | Alertas de retiro de medicamento activo | Canal interno |
 | Telemetría IoT cadena de frío | Nurse Canning 24 | Temperatura del compartimento inverso | Solo lectura |
 
-**Nota de frontera:** ningún sistema externo posee `EventoDeRetiro`; el aggregate vive en Gentle Care.
+**Nota de frontera:** ningún sistema externo posee `RetiroFarmaceutico`; el aggregate vive en Gentle Care.
 
 ---
 
@@ -220,11 +220,11 @@ Esquema de firma, timestamping y anclaje **no se deciden en discovery**. Hasta e
 
 ## 12. Candidatos de agregados / entidades / value objects (hipótesis, no decisiones)
 
-- `EventoDeRetiro` (aggregate root) conteniendo `CadenaDeCustodia` como colección de `NodoDeTransferencia` (entities).
+- `RetiroFarmaceutico` (aggregate root) conteniendo `CadenaDeCustodia` como colección de `NodoDeTransferencia` (entities).
   - *Hipótesis alternativa:* CadenaDeCustodia como aggregate propio. **Criterio de decisión para el Gate:** ¿comparten lifecycle y consistencia transaccional en el mismo boundary?
 - `MedicationIdentity`, `ClasificacionResiduo`, `FirmaDual` → value objects.
 - `OperadorHabilitado` → aggregate de datos maestros (invariante: vigencia de habilitación).
-- `Manifiesto` → entity dentro de EventoDeRetiro **vs** entity de un contexto regulatorio separado: **abierto**.
+- `Manifiesto` → entity dentro de RetiroFarmaceutico **vs** entity de un contexto regulatorio separado: **abierto**.
 - **No decidido:** nombres de paquetes, persistencia, transporte, formatos de firma.
 
 ---
