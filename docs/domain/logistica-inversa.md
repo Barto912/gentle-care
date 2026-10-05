@@ -1,7 +1,8 @@
 # Domain Discovery — Logística Inversa Farmacéutica
 
 **Bounded context:** `logistica-inversa-farmaceutica`
-**Versión:** 0.1 (borrador de discovery — pendiente de Engineering Gate)
+**Versión:** 0.2 (borrador de discovery — Gate E0: PASS WITH CONDITIONS)
+**Cambios v0.2:** (a) rename EventoDeRetiro → RetiroFarmaceutico según revisión del Gate E0 (commit e0745ac); (b) I6 recategorizada como hipótesis pendiente de validación farmacéutica.
 **Fecha:** 4 de octubre de 2026
 **Autor:** Barto912 (owner de producto/dominio)
 **Revisores pendientes:** Farmacéutico Institucional · Asesor legal ambiental-sanitario · Revisión técnica (Engineering Gate)
@@ -142,7 +143,7 @@ Detectado
 - **I3** — Todo Manifiesto exige FarmacéuticoClasificador como responsable técnico.
 - **I4** — Transportista y Operador con habilitación **vigente al momento del nodo** (validación temporal, no "actual").
 - **I5** — CadenaDeCustodia sin saltos: el nodo N+1 comienza donde terminó el N.
-- **I6** — MedicationIdentity completa (4 componentes) o Fail-Close.
+- **I6** — MedicationIdentity completa (4 componentes) o Fail-Close.*[HIPÓTESIS — pendiente de validación farmacéutica; no es invariante exigible hasta el Gate E1]*
 - **I7** — Una unidad retirada **nunca** vuelve al circuito comercial ni al stock válido.
 - **I8** — Todo cambio de estado emite exactamente un evento de dominio.
 - **I9** — Fail-Close por defecto: ante duda o invalidación, bloquear y escalar.
