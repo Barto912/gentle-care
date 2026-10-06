@@ -128,6 +128,12 @@ Ningún sistema externo posee `RetiroFarmaceutico`: el aggregate vive dentro del
 | H6 | Validación temporal de habilitaciones (I4): fuente de verdad OPDS, refresh y comportamiento offline en borde | Técnico | ADR-003 |
 | H7 | Tensión Ley 25.326 (derecho de cancelación/ARCO) vs. store append-only de receipts | Legal-técnico | ADR-002 |
 | H8 | Timeouts 72 h / 30 días: ¿contractuales u operativos? ¿Dónde se codifica el SLA? | Operativo | Context Map |
+| H9 | ¿`MedicamentoVencidoDetectado` es el evento inicial general de `RetiroFarmaceutico`, o el birth event debe generalizar la causa (vencimiento, discontinuación, cadena de frío, recall)? | Trigger | Aggregate Boundaries |
+| H10 | ¿`ConsentimientoRechazado → RetiroCerrado` y `DisposicionFinalCertificada → RetiroCerrado` deben producir el mismo resultado, o distinguir cancelación / rechazo / cierre exitoso? | Semántica de cierre | Aggregate Boundaries |
+| H11 | Distinguir command (`BloquearFailClose`), domain event (`FailCloseActivado`) y state (`Bloqueado`): `BloqueadoFailClose` representa un estado, no un evento | Modelado | Aggregate Boundaries |
+| H12 | ¿`Google Cloud Healthcare API` pertenece al bounded context o se accede vía Integration Contract/ACL (`Logística Inversa → ACL → FHIR → infraestructura`)? | Boundary externo | Context Map |
+
+> H9-H12 agregados por revisión E0 (Deivis): diferidos a Aggregate Boundaries / Context Map según indicación del revisor.
 
 ---
 
