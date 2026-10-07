@@ -1,11 +1,12 @@
 # Aggregate Boundaries — MVP-0 Logística Inversa Farmacéutica
 
 **Bounded context:** `logistica-inversa-farmaceutica`
-**Versión:** 0.2 (propuesta ajustada según revisión de Deivis — PASS WITH CHANGES)
+**Versión:** 0.3 (propuesta ajustada según revisión de Deivis — PASS WITH CHANGES + H14 resuelto)
+**Cambios v0.3:** Sección §9 agregada: resolución de H14 (reparación vs aceptación documentada de excepción)
 **Cambios v0.2:** (a) I8 reformulada sin cardinalidad 1:1 command/event; (b) ownership neutral `ResponsableRegulatorio`; (c) inputs diferidos H13/H14 registrados.
-**Fecha:** 7 de octubre de 2026 (v0.1) · 8 de octubre de 2026 (v0.2)
+**Fecha:** 7 de octubre de 2026 (v0.1) · 8 de octubre de 2026 (v0.2, v0.3)
 **Autor:** Barto912 (owner de producto/dominio)
-**Base:** `logistica-inversa.md` v0.2 · `event-storming-mvp0.md` (hotspots H1-H12) · revisión E0 (Deivis) · revisión de Aggregate Boundaries (Deivis): PASS WITH CHANGES
+**Base:** `logistica-inversa.md` v0.2 · `event-storming-mvp0.md` (hotspots H1-H14) · revisión E0 (Deivis) · revisión de Aggregate Boundaries (Deivis): PASS WITH CHANGES
 **Estado de madurez:** architecture discovery — sin código de producción hasta el Architecture Gate E1.
 
 ---
@@ -34,6 +35,8 @@
 | H1 CadenaDeCustodia | §3.1 | Resuelto en esta propuesta |
 | H2 Manifiesto | §3.2 | Resuelto en esta propuesta |
 | H12 Frontera FHIR / Cloud | Context Map | Diferido (patrón Integration Contract/ACL aceptado) |
+| H13 OperadorHabilitado | Context Map | Diferido (Reference Model vs Aggregate) |
+| H14 ResolverBloqueo | §9 | **Resuelto en esta versión (v0.3)** |
 
 ---
 
@@ -143,25 +146,100 @@ El SistemaGentleCare **no es owner de ningún aggregate**: emite commands asiste
 
 ## 6. Alineación pendiente (discovery v0.3 y event storming v0.2, post-aprobación)
 
-- Events nuevos: `RetiroIniciado`, `RetiroCancelado`, `RetiroCerradoPorExcepcion`.
+- Events nuevos: `RetiroIniciado`, `RetiroCancelado`, `RetiroCerradoPorExcepcion`, `NodoReparado`, `ExcepcionAceptada`.
 - Renames: `EventoCerrado` → `RetiroCerrado` · `CerrarEvento` → `CerrarRetiro` · state `BloqueadoFailClose` → `Bloqueado`.
-- Command nuevo: `IniciarRetiro`.
+- Commands nuevos: `IniciarRetiro`, `RepararNodo`, `AceptarExcepcion`.
+- Políticas nuevas: P7 (ventana de 48h para reparación de nodos).
+- I5 reformulada en discovery v0.3.
 - I6 **no se toca**: sigue como hipótesis hasta validación farmacéutica.
 
 ---
 
 ## 7. Checklist de revisión (criterios de Deivis)
 
-- [x] *Invariantes:* cada invariante I1-I9 mapeada a un aggregate único que la exige (§2.3, §3.3); I8 reformulada sin cardinalidad 1:1 (§0, §4)
+- [x] *Invariantes:* cada invariante I1-I9 mapeada a un aggregate único que la exige (§2.3, §3.3); I8 reformulada sin cardinalidad 1:1 (§0, §4); I5 reformulada (§9.4)
 - [x] *Consistencia transaccional:* ningún invariante cruzando boundaries sin justificación (§4)
 - [x] *Ownership:* todo hecho con un único owner humano identificado, con roles neutrales (§5)
-- [ ] *Failure boundaries:* toda falla con aggregate afectado y política explícita (§4) — pendiente H14: distinguir reparación vs. aceptación documentada de excepción en `ResolverBloqueo`
+- [x] *Failure boundaries:* toda falla con aggregate afectado y política explícita (§4); H14 resuelto con semántica clara de reparación vs aceptación (§9)
 
 ---
 
 ## 8. Próximos pasos del recorrido
 
 1. Context Map con H12 y H13: `Logística Inversa → Integration Contract/ACL → FHIR → infraestructura`; determinar si `OperadorHabilitado` es aggregate de este contexto o proyección de un Regulatory Registry Context.
-2. Resolver H14 antes de cerrar ADR-001: `ResolverBloqueo` ¿repara la condición que violó I5 o acepta/documenta una excepción todavía existente? La autoridad humana puede cerrar operacionalmente una excepción, pero no convierte retroactivamente una cadena inválida en válida.
-3. ADR-001 (aggregate boundaries), ADR-002 (operational evidence), ADR-003 (registros externos y offline).
-4. Architecture Gate E1.
+2. ADR-001 (aggregate boundaries), ADR-002 (operational evidence), ADR-003 (registros externos y offline).
+3. Architecture Gate E1.
+
+---
+
+## 9. Resolución de H14: Semántica de `ResolverBloqueo` (reparación vs aceptación)
+
+**Hotspot H14 (revisión de Deivis):** ¿`ResolverBloqueo` repara la condición que violó la invariante I5 o simplemente acepta/documenta una excepción todavía existente? La autoridad humana puede cerrar operacionalmente una excepción, pero no debería convertir retroactivamente una cadena inválida en válida.
+
+### 9.1 Dos paths de resolución, con semánticas distintas
+
+El sistema distingue **dos comandos de resolución** que producen **dos eventos terminales diferentes**:
+
+| Path | Command | Event | Semántica | Resultado terminal |
+|---|---|---|---|---|
+| **Reparación** | `RepararNodo(nodoId, evidenciaDigital, autoridadAtestadora)` | `NodoReparado` | El hueco se llena con evidencia legítima (firma digitalizada + atestación dual) | Cadena completa → `RetiroCerrado` |
+| **Aceptación documentada** | `AceptarExcepcion(huecoId, motivo, autoridad)` | `ExcepcionAceptada` | El hueco no puede repararse; se documenta quién aceptó y por qué | Cadena incompleta → `RetiroCerradoPorExcepcion` |
+
+### 9.2 Reparación: llenar el hueco con evidencia
+
+**Cuándo aplica:** El nodo faltante puede documentarse legítimamente después (ej: firma capturada en papel durante el retiro y digitalizada posteriormente con atestación dual).
+
+**Command:** `RepararNodo(nodoId, evidenciaDigital, autoridadAtestadora)`
+- `nodoId`: identificador del nodo faltante
+- `evidenciaDigital`: hash SHA-256 de la evidencia (firma digitalizada, foto, documento escaneado)
+- `autoridadAtestadora`: FarmacéuticoClasificador (o Director Médico si el actor original no está disponible)
+
+**Event:** `NodoReparado`
+- La cadena de custodia queda completa
+- El receipt congela: evidencia + autoridad + timestamp de reparación
+
+**Guard:** Solo válido dentro de **48 horas** del evento original que generó el hueco (Política P7). Después de ese plazo, solo `AceptarExcepcion` está disponible.
+
+### 9.3 Aceptación documentada: cerrar con excepción
+
+**Cuándo aplica:** El hueco no puede repararse (ej: el actor original falleció, la evidencia se perdió, el nodo es de un retiro de hace semanas).
+
+**Command:** `AceptarExcepcion(huecoId, motivo, autoridad)`
+- `huecoId`: identificador del nodo faltante
+- `motivo`: descripción textual de por qué no puede repararse
+- `autoridad`: Director Médico (único autorizado para aceptar excepciones)
+
+**Event:** `ExcepcionAceptada`
+- La cadena de custodia **sigue incompleta como hecho histórico**
+- El receipt congela: hueco + motivo + autoridad + timestamp
+- **Nada se convierte retroactivamente en válido**
+
+**Resultado:** `RetiroCerradoPorExcepcion` (evento terminal distinto de `RetiroCerrado`)
+
+### 9.4 Invariante I5 reformulada
+
+**Original (discovery v0.2):** Cadena de custodia sin saltos.
+
+**Reformulada (v0.3):** Toda discontinuidad en la cadena de custodia debe estar **o reparada con evidencia de continuidad (`NodoReparado`) o exceptuada con autoridad documentada (`ExcepcionAceptada`)**. El sistema jamás emite `RetiroCerrado` sin satisfacer una de estas dos condiciones.
+
+**Matriz de failure boundary:**
+
+| Situación | Comando disponible | Autoridad | Evento resultante |
+|---|---|---|---|
+| Nodo faltante dentro de 48h, evidencia disponible | `RepararNodo` | FarmacéuticoClasificador | `NodoReparado` → `RetiroCerrado` |
+| Nodo faltante dentro de 48h, sin evidencia | `AceptarExcepcion` | Director Médico | `ExcepcionAceptada` → `RetiroCerradoPorExcepcion` |
+| Nodo faltante después de 48h | `AceptarExcepcion` (único) | Director Médico | `ExcepcionAceptada` → `RetiroCerradoPorExcepcion` |
+
+### 9.5 Justificación contra los cuatro criterios de Deivis
+
+- **Invariantes:** I5 reformulada preserva la integridad de la cadena sin exigir perfección imposible.
+- **Consistencia transaccional:** `RepararNodo` y `AceptarExcepcion` operan sobre el mismo aggregate (`RetiroFarmaceutico`), sin cruzar boundaries.
+- **Ownership:** FarmacéuticoClasificador autoriza reparaciones; Director Médico autoriza excepciones (jerarquía de autoridad clara).
+- **Failure boundaries:** Si la autoridad no está disponible (ej: Director Médico de licencia), el retiro queda en state `Bloqueado` hasta que haya autoridad disponible. No hay workaround automático.
+
+### 9.6 Alineación pendiente (discovery v0.3 y event storming v0.2, post-aprobación)
+
+- Commands nuevos: `RepararNodo`, `AceptarExcepcion`
+- Events nuevos: `NodoReparado`, `ExcepcionAceptada`
+- Política nueva: P7 (ventana de 48h para reparación)
+- I5 reformulada en discovery v0.3
