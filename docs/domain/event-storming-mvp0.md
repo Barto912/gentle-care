@@ -10,6 +10,8 @@
 ---
 
 ## 0. Convenciones de lectura
+| H13 | ¿`OperadorHabilitado` pertenece a `logistica-inversa-farmaceutica` o es una proyección/reference model proveniente de un Regulatory Registry Context? | Ownership | Context Map |
+| H14 | ¿`ResolverBloqueo` repara la condición que violó la invariante I5 o simplemente acepta/documenta una excepción todavía existente? La autoridad humana puede cerrar operacionalmente una excepción, pero no convierte retroactivamente una cadena inválida en válida. | Semántica de excepción | ADR-001 |
 
 | Elemento | Notación | Significado |
 |---|---|---|
@@ -132,8 +134,11 @@ Ningún sistema externo posee `RetiroFarmaceutico`: el aggregate vive dentro del
 | H10 | ¿`ConsentimientoRechazado → RetiroCerrado` y `DisposicionFinalCertificada → RetiroCerrado` deben producir el mismo resultado, o distinguir cancelación / rechazo / cierre exitoso? | Semántica de cierre | Aggregate Boundaries |
 | H11 | Distinguir command (`BloquearFailClose`), domain event (`FailCloseActivado`) y state (`Bloqueado`): `BloqueadoFailClose` representa un estado, no un evento | Modelado | Aggregate Boundaries |
 | H12 | ¿`Google Cloud Healthcare API` pertenece al bounded context o se accede vía Integration Contract/ACL (`Logística Inversa → ACL → FHIR → infraestructura`)? | Boundary externo | Context Map |
+| H13 | ¿`OperadorHabilitado` pertenece a `logistica-inversa-farmaceutica` o es una proyección/reference model proveniente de un Regulatory Registry Context? | Ownership | Context Map |
+| H14 | ¿`ResolverBloqueo` repara la condición que violó la invariante I5 o simplemente acepta/documenta una excepción todavía existente? La autoridad humana puede cerrar operacionalmente una excepción, pero no convierte retroactivamente una cadena inválida en válida. | Semántica de excepción | ADR-001 |
 
 > H9-H12 agregados por revisión E0 (Deivis): diferidos a Aggregate Boundaries / Context Map según indicación del revisor.
+> H13-H14 agregados por revisión de Aggregate Boundaries (Deivis): H13 diferido a Context Map; H14 a resolver antes de cerrar ADR-001.
 
 ---
 
