@@ -2,7 +2,9 @@
 
 **Enfermería domiciliaria de precisión con IA en el borde.**
 
-[![CI](https://github.com/Barto912/gentle-care/actions/workflows/rdd-ci.yml/badge.svg)](https://github.com/Barto912/gentle-care/actions)
+[![CI](https://github.com/Barto912/nursehealth-ai/actions/workflows/main.yml/badge.svg)](https://github.com/Barto912/nursehealth-ai/actions)
+[![Docs](https://github.com/Barto912/nursehealth-ai/actions/workflows/auditoria-docs.yml/badge.svg)](https://github.com/Barto912/nursehealth-ai/actions)
+[![Seguridad](https://github.com/Barto912/nursehealth-ai/actions/workflows/seguridad-gitleaks.yml/badge.svg)](https://github.com/Barto912/nursehealth-ai/actions)
 
 > 🚧 **Estado del proyecto: INVESTIGACIÓN Y DISEÑO.**
 > Este repositorio no es un producto en producción.
@@ -34,7 +36,12 @@ Plataforma de enfermería de precisión extra-hospitalaria:
 - **Fail-close por diseño:** ante la duda, el sistema bloquea y
   escala a autoridad humana. Nunca improvisa.
 
-**Lema:** el enfermero decide, el sistema prueba.
+**Lema:** el criterio es humano, la trazabilidad es del sistema.
+
+**Tesis de plataforma:** enfermería de precisión con soporte de IA que
+convierte el trabajo autónomo calificado en carrera profesional:
+formación continua, reputación verificable y dignidad económica
+para los cuidadores de las Américas.
 
 ## Arquitectura
 
