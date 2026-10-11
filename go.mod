@@ -1,3 +1,3 @@
-module github.com/Barto912/gentle-care
+   module github.com/Barto912/nursehealth-ai
 
-go 1.23
+   go 1.23
