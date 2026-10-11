@@ -1,0 +1,22 @@
+name: Escaner de Secretos (GitLeaks)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  escanear-secretos:
+    name: Buscar contraseñas y llaves filtradas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el codigo con todo el historial
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ejecutar GitLeaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
